@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ t('opt_disease') }} - {{ t('app_title') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="chat-wrapper">
+    <div class="chat-header">
+        <span>{{ t('opt_disease') }}</span>
+    </div>
+
+    <div class="chat-body">
+
+        <!-- Language Switch -->
+        <div class="lang-switch">
+            {% for code in supported_langs %}
+                <a class="lang-pill {% if current_lang == code %}active{% endif %}"
+                   href="{{ lang_url(code) }}">{{ lang_labels[code] }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- Intro -->
+        <div class="message bot">
+            <h3 style="color: var(--brand-green);">🔬 AI Disease Detection</h3>
+            <p>{{ t('upload_leaf') }}</p>
+        </div>
+
+        <!-- Upload Form -->
+        <form action="/predict_disease?lang={{ current_lang }}" method="post" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit" class="option"
+                    style="background: var(--gradient-primary); color: white; border: none; margin-top: 16px;">
+                🔍 <strong>{{ t('detect') }}</strong>
+            </button>
+        </form>
+
+        <!-- INVALID IMAGE -->
+        {% if invalid_image %}
+            <div class="message bot" style="border-left:4px solid #e53e3e; background:#fff5f5;">
+                <h3>❌ Invalid Image</h3>
+                <p>Please upload a clear image of a crop leaf (Tomato, Potato, or Pepper).</p>
+            </div>
+        {% endif %}
+
+        <!-- VALID RESULT -->
+        {% if prediction and not invalid_image %}
+
+            <!-- RESULT SUMMARY -->
+            <div class="message bot"
+                 style="border-left: 4px solid var(--brand-yellow);
+                        background: linear-gradient(135deg, #fefcbf, #faf089);">
+
+                <p><strong>🌱 Detected Crop:</strong> {{ detected_crop }}</p>
+                <p><strong>🦠 Predicted Disease:</strong> {{ prediction }}</p>
+
+                {% if treatment %}
+                    <p>
+                        <strong>⚠ Severity:</strong>
+
+                        {% if treatment.severity == "Mild" %}
+                            <span style="color: green; font-weight:600;">
+                                {{ treatment.severity }}
+                            </span>
+
+                        {% elif treatment.severity == "Moderate" %}
+                            <span style="color: orange; font-weight:600;">
+                                {{ treatment.severity }}
+                            </span>
+
+                        {% else %}
+                            <span style="color: red; font-weight:600;">
+                                {{ treatment.severity }}
+                            </span>
+                        {% endif %}
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- ============================= -->
+            <!-- TREATMENT SECTION -->
+            <!-- ============================= -->
+
+            {% if treatment %}
+
+                <!-- CHEMICAL TREATMENT -->
+                {% if treatment.chemical %}
+                <div class="message bot">
+                    <h3>💊 Chemical Treatment</h3>
+                    {% for chem in treatment.chemical %}
+                        <div style="margin-bottom:12px;">
+                            <strong>{{ chem.name }}</strong><br>
+                            Dosage: <strong>{{ chem.dosage }}</strong><br>
+                            Spray Interval: {{ chem.interval }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- ORGANIC TREATMENT -->
+                {% if treatment.organic %}
+                <div class="message bot">
+                    <h3>🌿 Organic Alternatives</h3>
+                    {% for org in treatment.organic %}
+                        <div style="margin-bottom:12px;">
+                            <strong>{{ org.name }}</strong><br>
+                            Dosage: {{ org.dosage }}<br>
+                            Interval: {{ org.interval }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- CULTURAL PRACTICES -->
+                {% if treatment.cultural %}
+                <div class="message bot">
+                    <h3>🛡 Field Management Measures</h3>
+                    <ul>
+                        {% for step in treatment.cultural %}
+                            <li>{{ step }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- RECOVERY PLAN -->
+                {% if treatment.recovery_phases %}
+                <div class="message bot">
+                    <h3>🗺 Recovery Plan</h3>
+
+                    {% if treatment.recovery_phases.phase_1 %}
+                        <strong>🔴 Immediate Action</strong>
+                        <ul>
+                            {% for action in treatment.recovery_phases.phase_1 %}
+                                <li>{{ action }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    {% if treatment.recovery_phases.phase_2 %}
+                        <strong>🟡 Control & Monitoring</strong>
+                        <ul>
+                            {% for action in treatment.recovery_phases.phase_2 %}
+                                <li>{{ action }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    {% if treatment.recovery_phases.phase_3 %}
+                        <strong>🟢 Stabilization</strong>
+                        <ul>
+                            {% for action in treatment.recovery_phases.phase_3 %}
+                                <li>{{ action }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    <p><strong>📅 Expected Recovery:</strong> {{ treatment.expected_recovery_days }}</p>
+                </div>
+                {% endif %}
+
+            {% endif %}
+
+            <!-- OPTIONS -->
+            <div class="options">
+                <a href="{{ url_for('disease_page', lang=current_lang) }}" class="option">
+                    📷 <strong>Check Another Leaf</strong>
+                </a>
+                <a href="{{ url_for('home', lang=current_lang) }}" class="option">
+                    🏠 <strong>{{ t('back_home') }}</strong>
+                </a>
+            </div>
+
+        {% endif %}
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-light);">
+            <p style="color: var(--text-muted); font-size: 14px;">
+                🧪 Powered by AI • Advanced Crop Advisory System
+            </p>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

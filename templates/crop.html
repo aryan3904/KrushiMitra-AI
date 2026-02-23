@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ t('opt_crop') }} - {{ t('app_title') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="chat-wrapper">
+
+    <!-- HEADER -->
+    <div class="chat-header">
+        <span>{{ t('opt_crop') }}</span>
+    </div>
+
+    <div class="chat-body">
+
+        <!-- LANGUAGE SWITCH -->
+        <div class="lang-switch">
+            {% for code in supported_langs %}
+                <a class="lang-pill {% if current_lang == code %}active{% endif %}"
+                   href="{{ lang_url(code) }}">
+                    {{ lang_labels[code] }}
+                </a>
+            {% endfor %}
+        </div>
+
+        <!-- STEP 1: SEASON SELECTION -->
+        {% if not season %}
+            <div class="message bot">
+                <h3 style="margin: 0 0 12px 0; color: var(--brand-green);">🌱 {{ t('crop_intro') }}</h3>
+                <p style="margin: 0; color: var(--text-secondary);">{{ t('select_season') }}</p>
+            </div>
+
+            <div class="options">
+                <a href="{{ url_for('crop_selection', season='Kharif', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🌧️</span>
+                    <div>
+                        <strong>{{ t('kharif_season') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('kharif_desc') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('crop_selection', season='Rabi', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🌾</span>
+                    <div>
+                        <strong>{{ t('rabi_season') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('rabi_desc') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('crop_selection', season='Zaid', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">☀️</span>
+                    <div>
+                        <strong>{{ t('zaid_season') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('zaid_desc') }}</small>
+                    </div>
+                </a>
+            </div>
+
+        <!-- STEP 2: SOIL TYPE SELECTION -->
+        {% elif season and not soil %}
+            <div class="message bot">
+                <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                    <strong style="color: var(--brand-green);">📅 {{ t('season') }}:</strong> {{ season }}
+                </div>
+                <h3 style="margin: 0 0 12px 0; color: var(--brand-brown);">🪨 {{ t('select_soil') }}</h3>
+            </div>
+
+            <div class="options">
+                <a href="{{ url_for('crop_selection', season=season, soil='Black', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🖤</span>
+                    <div>
+                        <strong>{{ t('black_soil') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('black_desc') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('crop_selection', season=season, soil='Red', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🔴</span>
+                    <div>
+                        <strong>{{ t('red_soil') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('red_desc') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('crop_selection', season=season, soil='Loamy', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🌾</span>
+                    <div>
+                        <strong>{{ t('loamy_soil') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('loamy_desc') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('crop_selection', season=season, soil='Sandy', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🏖️</span>
+                    <div>
+                        <strong>{{ t('sandy_soil') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('sandy_desc') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('crop_selection', season=season, soil='Clay', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🟫</span>
+                    <div>
+                        <strong>{{ t('clay_soil') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('clay_desc') }}</small>
+                    </div>
+                </a>
+            </div>
+
+        <!-- STEP 3: WATER AVAILABILITY -->
+        {% elif season and soil and not water %}
+            <div class="message bot">
+                <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                    <strong style="color: var(--brand-green);">📅 {{ t('season') }}:</strong> {{ season }}<br>
+                    <strong style="color: var(--brand-brown);">🪨 {{ t('soil') }}:</strong> {{ soil }}
+                </div>
+                <h3 style="margin: 0 0 12px 0; color: var(--brand-blue);">💧 {{ t('select_water') }}</h3>
+            </div>
+
+            <div class="options">
+                <a href="{{ url_for('crop_selection', season=season, soil=soil, water='Low', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">💧</span>
+                    <div>
+                        <strong>{{ t('low_water') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('low_desc') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('crop_selection', season=season, soil=soil, water='Medium', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">💧💧</span>
+                    <div>
+                        <strong>{{ t('medium_water') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('medium_desc') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('crop_selection', season=season, soil=soil, water='High', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">💧💧💧</span>
+                    <div>
+                        <strong>{{ t('high_water') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('high_desc') }}</small>
+                    </div>
+                </a>
+            </div>
+
+        <!-- STEP 4: RESULTS + PLANNING -->
+        {% else %}
+            <div class="message bot">
+                <h3 style="margin: 0 0 16px 0; color: var(--brand-green);">🎯 {{ t('based_on') }}</h3>
+                
+                <!-- SELECTED OPTIONS SUMMARY -->
+                <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; margin: 16px 0; border-left: 4px solid var(--brand-green);">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 8px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; margin-bottom: 4px;">🌾</div>
+                            <div style="font-weight: bold; color: var(--brand-green);">{{ season }}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">{{ t('season') }}</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; margin-bottom: 4px;">🌱</div>
+                            <div style="font-weight: bold; color: var(--brand-brown);">{{ soil }}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">{{ t('soil') }}</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; margin-bottom: 4px;">💧</div>
+                            <div style="font-weight: bold; color: var(--brand-blue);">{{ water }}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">{{ t('water') }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if predicted_crops %}
+                    {% for crop in predicted_crops %}
+                        <div style="background: linear-gradient(135deg, var(--brand-green), var(--brand-yellow)); color: white; padding: 16px; border-radius: 12px; margin: 8px 0;">
+                            <strong style="font-size: 18px;">🌱 {{ crop }}</strong>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="background: var(--bg-error); color: var(--text-error); padding: 16px; border-radius: 12px; margin: 16px 0;">
+                        <strong>No suitable crops found for the selected conditions.</strong>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if predicted_crops %}
+            <div class="options">
+                {% for crop in predicted_crops %}
+                    <a href="{{ url_for('crop_plan', crop=crop, lang=current_lang) }}" class="option" style="background: var(--gradient-primary); color: white; border: none; margin-bottom: 8px;">
+                        <span style="font-size: 24px;">📋</span>
+                        <div>
+                            <strong>{{ t('view_plan') }} {{ crop }}</strong>
+                            <br><small>{{ t('complete_guide') }}</small>
+                        </div>
+                    </a>
+                {% endfor %}
+                <a href="{{ url_for('crop_selection', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🔄</span>
+                    <div>
+                        <strong>{{ t('start_again') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('choose_different') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('home', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🏠</span>
+                    <div>
+                        <strong>{{ t('back_home') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('return_main') }}</small>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+        {% endif %}
+
+    </div>
+</div>
+</body>
+</html>

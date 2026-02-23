@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ t('app_title') }} - Smart Agriculture Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Krushi Mitra AI - Your intelligent farming companion for crop planning and disease detection">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+</head>
+<body>
+    <div class="chat-wrapper">
+        <div class="chat-header">
+            <span>{{ t('app_title') }}</span>
+        </div>
+
+        <div class="chat-body">
+            <!-- Language Switch -->
+            <div class="lang-switch">
+                {% for code in supported_langs %}
+                    <a class="lang-pill {% if current_lang == code %}active{% endif %}" href="{{ lang_url(code) }}">{{ lang_labels[code] }}</a>
+                {% endfor %}
+            </div>
+
+            <!-- Welcome Message -->
+            <div class="message bot">
+                <h2 style="margin: 0 0 12px 0; color: var(--brand-green);">🌾 {{ t('namaste') }}!</h2>
+                <p style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">{{ t('home_intro') }}</p>
+                <p style="margin: 0; color: var(--text-secondary);">{{ t('home_q') }}</p>
+            </div>
+
+            <!-- Feature Options -->
+            <div class="options">
+                <a href="{{ url_for('crop_selection', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🌱</span>
+                    <div>
+                        <strong>{{ t('opt_crop') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('opt_crop_desc') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('disease_page', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🔬</span>
+                    <div>
+                        <strong>{{ t('opt_disease') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('opt_disease_desc') }}</small>
+                    </div>
+                </a>
+                <a href="#" class="option disabled" aria-disabled="true">
+                    <span style="font-size: 24px;">🌾</span>
+                    <div>
+                        <strong>{{ t('opt_fertilizer') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('coming_soon') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('manual_treatment', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">🩺</span>
+                    <div>
+                        <strong>Treatment Recommendation</strong>
+                        <br><small style="color: var(--text-muted);">Manual crop disease & pest advisory</small>
+                    </div>
+                </a>
+
+                <a href="#" class="option disabled" aria-disabled="true">
+                    <span style="font-size: 24px;">💰</span>
+                    <div>
+                        <strong>{{ t('opt_market') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('coming_soon') }}</small>
+                    </div>
+                </a>
+                <a href="#" class="option disabled" aria-disabled="true">
+                    <span style="font-size: 24px;">🏛️</span>
+                    <div>
+                        <strong>{{ t('opt_schemes') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('coming_soon') }}</small>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Footer -->
+            <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-light);">
+                <p style="color: var(--text-muted); font-size: 14px; margin: 0;">
+                    🧑‍🌾 Powered by AI for Indian Farmers
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

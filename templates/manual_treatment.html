@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Manual Treatment - {{ t('app_title') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="chat-wrapper">
+    <div class="chat-header">
+        <span>🩺 Treatment Recommendation</span>
+    </div>
+
+    <div class="chat-body">
+ 
+    <p class="small-note">Follow the guided steps to get tailored treatment recommendations.</p>
+        <!-- ========================= -->
+        <!-- STEP 1: SELECT CROP -->
+        <!-- ========================= -->
+        {% if step == "crop" %}
+        <div class="message bot">
+            <div class="step-indicator">Step 1 of 6</div>
+            <h3>🌾 Select your crop</h3>
+        </div>
+
+        <div class="options">
+            {% for crop in crops %}
+            <a href="{{ url_for('manual_treatment', step='problem', value=crop) }}" class="option" role="button" aria-label="Select {{ crop }}">
+                <span class="option-text">{{ crop }}</span>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+
+        <!-- ========================= -->
+        <!-- STEP 2: SELECT PROBLEM -->
+        <!-- ========================= -->
+        {% if step == "problem" %}
+        <div class="message bot">
+            <div class="step-indicator">Step 2 of 6</div>
+            <h3>🌾 Crop: {{ crop }}</h3>
+            <p>🔎 What problem are you observing?</p>
+        </div>
+
+        {% if diseases %}
+        <div class="message bot"><strong>🦠 Diseases</strong></div>
+        <div class="options">
+            {% for d in diseases %}
+            <a href="{{ url_for('manual_treatment', step='problem_select', value=d) }}" class="option" role="button" aria-label="Select {{ d }}">
+                <span class="option-text">{{ d }}</span>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if pests %}
+        <div class="message bot"><strong>🐛 Pest Problems</strong></div>
+        <div class="options">
+            {% for p in pests %}
+            <a href="{{ url_for('manual_treatment', step='problem_select', value=p) }}" class="option" role="button" aria-label="Select {{ p }}">
+                <span class="option-text">{{ p }}</span>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+
+
+        <!-- ================================================= -->
+        <!-- 🔬 DISEASE FLOW -->
+        <!-- ================================================= -->
+
+        {% if step == "disease_severity" %}
+        <div class="message bot">
+            <div class="step-indicator">Step 3 of 6</div>
+            <h3>{{ crop }} → {{ problem }}</h3>
+            <p>⚠ How severe is the issue?</p>
+        </div>
+
+        <div class="options">
+            <a href="{{ url_for('manual_treatment', step='disease_severity', value='Mild') }}" class="option" role="button">🟢 Mild</a>
+            <a href="{{ url_for('manual_treatment', step='disease_severity', value='Moderate') }}" class="option" role="button">🟡 Moderate</a>
+            <a href="{{ url_for('manual_treatment', step='disease_severity', value='Severe') }}" class="option" role="button">🔴 Severe</a>
+        </div>
+        {% endif %}
+
+
+        {% if step == "disease_humidity" %}
+        <div class="message bot">
+            <div class="step-indicator">Step 4 of 6</div>
+            <h3>{{ crop }} → {{ problem }}</h3>
+            <p>🌧 Is the weather humid or rainy?</p>
+        </div>
+
+        <div class="options">
+            <a href="{{ url_for('manual_treatment', step='disease_humidity', value='Yes') }}" class="option" role="button">Yes</a>
+            <a href="{{ url_for('manual_treatment', step='disease_humidity', value='No') }}" class="option" role="button">No</a>
+            <a href="{{ url_for('manual_treatment', step='disease_humidity', value='Not Sure') }}" class="option" role="button">Not Sure</a>
+        </div>
+        {% endif %}
+
+
+        {% if step == "disease_spread" %}
+        <div class="message bot">
+            <div class="step-indicator">Step 5 of 6</div>
+            <h3>{{ crop }} → {{ problem }}</h3>
+            <p>📈 Is the infection spreading rapidly?</p>
+        </div>
+
+        <div class="options">
+            <a href="{{ url_for('manual_treatment', step='disease_spread', value='Yes') }}" class="option" role="button">Yes</a>
+            <a href="{{ url_for('manual_treatment', step='disease_spread', value='No') }}" class="option" role="button">No</a>
+            <a href="{{ url_for('manual_treatment', step='disease_spread', value='Not Sure') }}" class="option" role="button">Not Sure</a>
+        </div>
+        {% endif %}
+
+
+        <!-- ================================================= -->
+        <!-- 🐛 PEST FLOW -->
+        <!-- ================================================= -->
+
+        {% if step == "pest_insects" %}
+        <div class="message bot">
+            <div class="step-indicator">Step 3 of 6</div>
+            <h3>{{ crop }} → {{ problem }}</h3>
+            <p>🐛 How many insects per plant?</p>
+        </div>
+
+        <div class="options">
+            <a href="{{ url_for('manual_treatment', step='pest_insects', value='1-2') }}" class="option" role="button">1–2</a>
+            <a href="{{ url_for('manual_treatment', step='pest_insects', value='3-5') }}" class="option" role="button">3–5</a>
+            <a href="{{ url_for('manual_treatment', step='pest_insects', value='5+') }}" class="option" role="button">More than 5</a>
+            <a href="{{ url_for('manual_treatment', step='pest_insects', value='Not Sure') }}" class="option" role="button">Not Sure</a>
+        </div>
+        {% endif %}
+
+
+        {% if step == "pest_damage" %}
+        <div class="message bot">
+            <div class="step-indicator">Step 4 of 6</div>
+            <h3>{{ crop }} → {{ problem }}</h3>
+            <p>🌿 What percentage of plants are damaged?</p>
+        </div>
+
+        <div class="options">
+            <a href="{{ url_for('manual_treatment', step='pest_damage', value='<10') }}" class="option" role="button">Less than 10%</a>
+            <a href="{{ url_for('manual_treatment', step='pest_damage', value='10-30') }}" class="option" role="button">10–30%</a>
+            <a href="{{ url_for('manual_treatment', step='pest_damage', value='30+') }}" class="option" role="button">More than 30%</a>
+            <a href="{{ url_for('manual_treatment', step='pest_damage', value='Not Sure') }}" class="option" role="button">Not Sure</a>
+        </div>
+        {% endif %}
+
+
+        {% if step == "pest_spread" %}
+        <div class="message bot">
+            <div class="step-indicator">Step 5 of 6</div>
+            <h3>{{ crop }} → {{ problem }}</h3>
+            <p>📈 Is infestation increasing rapidly?</p>
+        </div>
+
+        <div class="options">
+            <a href="{{ url_for('manual_treatment', step='pest_spread', value='Yes') }}" class="option" role="button">Yes</a>
+            <a href="{{ url_for('manual_treatment', step='pest_spread', value='No') }}" class="option" role="button">No</a>
+            <a href="{{ url_for('manual_treatment', step='pest_spread', value='Not Sure') }}" class="option" role="button">Not Sure</a>
+        </div>
+        {% endif %}
+
+
+        <!-- ================================================= -->
+        <!-- STEP 6: RESULT -->
+        <!-- ================================================= -->
+
+        {% if step == "result" and treatment %}
+        <div class="message bot">
+            <div class="step-indicator">Step 6 of 6</div>
+            <h3>🌾 {{ crop }} → {{ problem }}</h3>
+            <div class="result-card">
+                <p><strong>Severity:</strong>
+                    <span class="chip {% if treatment.severity == 'Mild' %}severity-mild{% elif treatment.severity == 'Moderate' %}severity-moderate{% else %}severity-severe{% endif %}">
+                        {{ treatment.severity }}
+                    </span>
+                </p>
+
+                {% if treatment.chemical %}
+                <div style="margin-top:12px;">
+                    <h4>💊 Chemical Treatment</h4>
+                    {% for chem in treatment.chemical %}
+                    <div style="margin-bottom:8px;">
+                        <strong>{{ chem.name }}</strong><br>
+                        <span class="small-note">Dosage:</span> {{ chem.dosage }} • <span class="small-note">Interval:</span> {{ chem.interval }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if treatment.organic %}
+                <div style="margin-top:12px;">
+                    <h4>🌿 Organic Treatment</h4>
+                    {% for org in treatment.organic %}
+                    <div style="margin-bottom:8px;">
+                        <strong>{{ org.name }}</strong><br>
+                        <span class="small-note">Dosage:</span> {{ org.dosage }} • <span class="small-note">Interval:</span> {{ org.interval }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if treatment.cultural %}
+                <div style="margin-top:12px;">
+                    <h4>🛡 Cultural Measures</h4>
+                    <ul>
+                        {% for c in treatment.cultural %}
+                        <li>{{ c }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="options">
+            <a href="{{ url_for('manual_treatment', step='reset') }}" class="option" role="button">🔄 Start Again</a>
+            <a href="{{ url_for('home') }}" class="option" role="button">🏠 Back to Home</a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+</body>
+</html>

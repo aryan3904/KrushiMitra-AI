@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ crop }} Plan - {{ t('app_title') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="chat-wrapper">
+    <div class="chat-header">
+        <span>{{ crop }} {{ t('farming_guide') }}</span>
+    </div>
+
+    <div class="chat-body">
+        {% if plan %}
+            <!-- Crop Header -->
+            <div class="message bot" style="background: var(--gradient-primary); color: white; text-align: center;">
+                <h2 style="margin: 0 0 8px 0; font-size: 24px;">🌾 {{ crop }}</h2>
+                <p style="margin: 0; opacity: 0.9;">{{ t('complete_guide_desc') }}</p>
+            </div>
+
+            <!-- Plan Details -->
+            <div class="message bot">
+                <div style="display: grid; gap: 16px;">
+                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; border-left: 4px solid var(--brand-green);">
+                        <h4 style="margin: 0 0 8px 0; color: var(--brand-green); display: flex; align-items: center; gap: 8px;">
+                            <span>🌱</span> {{ t('sowing_season') }}
+                        </h4>
+                        <p style="margin: 0; font-weight: 600;">{{ plan.sowing }}</p>
+                    </div>
+
+                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; border-left: 4px solid var(--brand-brown);">
+                        <h4 style="margin: 0 0 8px 0; color: var(--brand-brown); display: flex; align-items: center; gap: 8px;">
+                            <span>🌾</span> {{ t('seed_selection') }}
+                        </h4>
+                        <p style="margin: 0;">{{ plan.seed }}</p>
+                    </div>
+
+                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; border-left: 4px solid var(--brand-yellow);">
+                        <h4 style="margin: 0 0 8px 0; color: var(--brand-yellow); display: flex; align-items: center; gap: 8px;">
+                            <span>🧑‍🌾</span> {{ t('land_prep') }}
+                        </h4>
+                        <p style="margin: 0;">{{ plan.land }}</p>
+                    </div>
+
+                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; border-left: 4px solid var(--accent-orange);">
+                        <h4 style="margin: 0 0 8px 0; color: var(--accent-orange); display: flex; align-items: center; gap: 8px;">
+                            <span>🧪</span> {{ t('fertilizer_plan') }}
+                        </h4>
+                        <p style="margin: 0;">{{ plan.fertilizer }}</p>
+                    </div>
+
+                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; border-left: 4px solid var(--brand-blue);">
+                        <h4 style="margin: 0 0 8px 0; color: var(--brand-blue); display: flex; align-items: center; gap: 8px;">
+                            <span>💧</span> {{ t('irrigation_guide') }}
+                        </h4>
+                        <p style="margin: 0;">{{ plan.irrigation }}</p>
+                    </div>
+
+                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; border-left: 4px solid #e53e3e;">
+                        <h4 style="margin: 0 0 8px 0; color: #e53e3e; display: flex; align-items: center; gap: 8px;">
+                            <span>🦠</span> {{ t('common_diseases') }}
+                        </h4>
+                        <p style="margin: 0;">{{ plan.diseases }}</p>
+                    </div>
+
+                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; border-left: 4px solid var(--brand-green);">
+                        <h4 style="margin: 0 0 8px 0; color: var(--brand-green); display: flex; align-items: center; gap: 8px;">
+                            <span>🌾</span> {{ t('harvest_time') }}
+                        </h4>
+                        <p style="margin: 0; font-weight: 600;">{{ plan.harvest }}</p>
+                    </div>
+
+                    <!-- Step-wise Guide -->
+                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; border-left: 4px solid var(--accent-orange); margin-top: 16px;">
+                        <h4 style="margin: 0 0 16px 0; color: var(--accent-orange); display: flex; align-items: center; gap: 8px;">
+                            <span>📋</span> Step-wise Planting Guide
+                        </h4>
+                        <ol style="margin: 0; padding-left: 20px;">
+                            {% for step in plan.steps %}
+                            <li style="margin-bottom: 8px; line-height: 1.5;">{{ step }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+
+                    <!-- YouTube Video Link -->
+                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; border-left: 4px solid #ff0000; margin-top: 16px;">
+                        <h4 style="margin: 0 0 12px 0; color: #ff0000; display: flex; align-items: center; gap: 8px;">
+                            <span>📺</span> Video Tutorial
+                        </h4>
+                        <p style="margin: 0 0 12px 0;">Watch this comprehensive video guide for {{ crop }} cultivation:</p>
+                        <a href="{{ plan.youtube }}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: #ff0000; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                            <span>▶️</span> Watch on YouTube
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="options">
+                <a href="{{ url_for('crop_selection', lang=current_lang) }}" class="option">
+                    <span style="font-size: 20px;">🔄</span>
+                    <div>
+                        <strong>{{ t('plan_another') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('choose_different') }}</small>
+                    </div>
+                </a>
+                <a href="{{ url_for('home', lang=current_lang) }}" class="option">
+                    <span style="font-size: 20px;">🏠</span>
+                    <div>
+                        <strong>{{ t('back_home') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('return_main') }}</small>
+                    </div>
+                </a>
+            </div>
+
+        {% else %}
+            <div class="message bot" style="text-align: center;">
+                <h3 style="color: var(--brand-brown); margin: 0 0 16px 0;">📋 {{ t('coming_soon_title') }}</h3>
+                <p style="margin: 0; color: var(--text-secondary);">{{ t('detailed_guide') }} {{ crop }} {{ t('being_prepared') }}</p>
+            </div>
+
+            <div class="options">
+                <a href="{{ url_for('crop_selection', lang=current_lang) }}" class="option">
+                    <span style="font-size: 20px;">⬅</span>
+                    <strong>{{ t('start_again') }}</strong>
+                </a>
+                <a href="{{ url_for('home', lang=current_lang) }}" class="option">
+                    <span style="font-size: 20px;">🏠</span>
+                    <strong>{{ t('back_home') }}</strong>
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-light);">
+            <p style="color: var(--text-muted); font-size: 14px; margin: 0;">
+                📖 {{ t('footer_note') }}
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>            </a>
+            <a href="{{ url_for('home', lang=current_lang) }}" class="option">
+                🏠 {{ t('back_home') }}
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

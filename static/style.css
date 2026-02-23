@@ -1,0 +1,338 @@
+/* Agriculture-themed UI: Earth tones, farming patterns, modern design */
+:root {
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #e8f5e8;
+    --card-bg: #ffffff;
+    --text-primary: #2d3748;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
+    --brand-green: #38a169;
+    --brand-brown: #8b4513;
+    --brand-yellow: #d69e2e;
+    --brand-blue: #3182ce;
+    --accent-orange: #ed8936;
+    --border-light: #e2e8f0;
+    --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.15);
+    --gradient-primary: linear-gradient(135deg, #38a169 0%, #68d391 100%);
+    --gradient-secondary: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+    --gradient-accent: linear-gradient(135deg, #d69e2e 0%, #ed8936 100%);
+    --ink: #23423a;
+    --line: #e6eef0;
+    --muted: #6b7280;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:
+        radial-gradient(circle at 20% 80%, rgba(56, 161, 105, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(214, 158, 46, 0.05) 0%, transparent 50%),
+        var(--bg-primary);
+    min-height: 100vh;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Main container with farming-inspired design */
+.chat-wrapper {
+    max-width: 800px;
+    min-height: 600px;
+    margin: 20px auto;
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow-heavy);
+    border: 2px solid var(--border-light);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Add subtle farming pattern overlay */
+.chat-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 25% 25%, rgba(56, 161, 105, 0.03) 2px, transparent 2px),
+        radial-gradient(circle at 75% 75%, rgba(139, 69, 19, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px, 20px 20px;
+    pointer-events: none;
+    border-radius: 20px;
+}
+
+/* Header with gradient and farming icon */
+.chat-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 24px 20px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: 0.5px;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+}
+
+.chat-header::before {
+    content: '🌾';
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 28px;
+}
+
+.chat-body {
+    padding: 24px;
+    background: var(--bg-secondary);
+    position: relative;
+    z-index: 1;
+}
+
+/* Language switch with better styling */
+.lang-switch {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.lang-pill {
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 25px;
+    border: 2px solid var(--border-light);
+    background: white;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+}
+
+.lang-pill:hover {
+    border-color: var(--brand-green);
+    color: var(--brand-green);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.lang-pill.active {
+    border-color: var(--brand-yellow);
+    background: var(--brand-yellow);
+    color: white;
+    box-shadow: 0 4px 12px rgba(214, 158, 46, 0.3);
+}
+
+/* Message bubbles with farming theme */
+.message {
+    max-width: 95%;
+    padding: 16px 20px;
+    border-radius: 18px;
+    margin-bottom: 16px;
+    line-height: 1.6;
+    font-size: 16px;
+    position: relative;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.message.bot {
+    background: white;
+    color: var(--text-primary);
+    border: 2px solid rgba(56, 161, 105, 0.1);
+    box-shadow: var(--shadow-light);
+    margin-right: auto;
+    border-bottom-left-radius: 4px;
+}
+
+.message.bot::before {
+    content: '🤖';
+    position: absolute;
+    left: -12px;
+    top: 16px;
+    background: var(--brand-green);
+    color: white;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: var(--shadow-medium);
+}
+
+.message ul {
+    margin: 12px 0 0;
+    padding-left: 20px;
+}
+
+.message li {
+    margin-bottom: 8px;
+}
+
+/* Options grid with card-like design */
+.options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    width: 100%;
+    max-width: 95%;
+    margin-bottom: 12px;
+}
+
+/* Make links and buttons look consistent */
+.option,
+button.option {
+    width: 100%;
+    text-decoration: none;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.98) 100%);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    font-size: 15px;
+    font-weight: 700;
+    text-align: left;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    transition: transform 0.12s ease, box-shadow 0.18s ease, border-color 0.12s ease;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(20, 40, 20, 0.04);
+}
+
+/* Ensure options align with preceding message card */
+.message + .options {
+    margin-top: 8px;
+}
+
+/* Add space between an options block and the following message (e.g., Diseases -> Pest Problems) */
+.options + .message {
+    margin-top: 18px;
+}
+
+.option.disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    background: rgba(20, 49, 31, 0.03);
+    pointer-events: none;
+}
+
+.option.disabled:hover {
+    background: rgba(20, 49, 31, 0.03);
+    border-color: var(--line);
+}
+
+.option:hover,
+button.option:hover {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: rgba(56,161,105,0.9);
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 14px 30px rgba(56,161,105,0.12);
+}
+
+.option:active,
+button.option:active {
+    transform: translateY(1px);
+}
+
+.option:focus-visible,
+button.option:focus-visible,
+input:focus-visible {
+    outline: 3px solid rgba(242, 183, 5, 0.75);
+    outline-offset: 2px;
+}
+
+form {
+    display: grid;
+    gap: 12px;
+    margin: 8px 0 0;
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 14px;
+    border: 2px dashed rgba(31, 138, 58, 0.45);
+    background: rgba(31, 138, 58, 0.05);
+    color: var(--muted);
+    font-size: 15px;
+}
+
+/* Two-column option grid on wider screens */
+@media (min-width: 700px) {
+    .chat-body { padding: 20px; }
+    .options { grid-template-columns: 1fr 1fr; }
+    .message { font-size: 17px; }
+}
+
+/* Step progress indicator */
+.step-indicator {
+    font-size: 13px;
+    color: var(--muted);
+    background: rgba(0,0,0,0.03);
+    padding: 6px 10px;
+    border-radius: 999px;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+/* Result card styling */
+.result-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,249,250,0.98));
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 6px 18px rgba(12,34,12,0.04);
+}
+
+.chip {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(56,161,105,0.12);
+    color: var(--brand-green);
+    font-weight: 700;
+    margin-left: 8px;
+}
+
+.small-note {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* Prediction result colors */
+.healthy {
+    color: var(--brand-green);
+}
+
+.unhealthy {
+    color: #e53e3e;
+}
+.severity-mild {
+    color: #2f855a;
+    font-weight: 600;
+}
+
+.severity-moderate {
+    color: #d69e2e;
+    font-weight: 600;
+}
+
+.severity-severe {
+    color: #c53030;
+    font-weight: 600;
+}
