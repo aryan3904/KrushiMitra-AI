@@ -11,6 +11,15 @@
     <div class="chat-wrapper">
         <div class="chat-header">
             <span>{{ t('app_title') }}</span>
+            <div style="position:absolute; right:16px; top:12px;">
+                {% if current_user %}
+                    <small>{{ current_user.phone }} ({{ current_user.role }})</small>
+                    | <a href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Login</a> |
+                    <a href="{{ url_for('signup') }}">Sign Up</a>
+                {% endif %}
+            </div>
         </div>
 
         <div class="chat-body">
@@ -23,7 +32,7 @@
 
             <!-- Welcome Message -->
             <div class="message bot">
-                <h2 style="margin: 0 0 12px 0; color: var(--brand-green);">🌾 {{ t('namaste') }}!</h2>
+                <h2 style="margin: 0 0 12px 0; color: var(--brand-green);">🌾 {{ t('namaste') }}{% if current_user %}, {{ current_user.phone }}{% endif %}!</h2>
                 <p style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">{{ t('home_intro') }}</p>
                 <p style="margin: 0; color: var(--text-secondary);">{{ t('home_q') }}</p>
             </div>

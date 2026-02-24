@@ -192,6 +192,55 @@ body {
     margin-bottom: 12px;
 }
 
+/* flash message list */
+.flashes {
+    list-style: none;
+    margin-bottom: 16px;
+    color: var(--accent-orange);
+}
+
+/* auth form inside chat bubbles */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 320px;
+}
+
+.form-field label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.form-field input,
+.form-field select {
+    padding: 8px 10px;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    width: 100%;
+}
+
+.btn-primary {
+    background: var(--brand-green);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: var(--brand-blue);
+}
+
+.small-text {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
 /* Make links and buttons look consistent */
 .option,
 button.option {

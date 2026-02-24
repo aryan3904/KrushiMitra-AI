@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ t('app_title') }} - Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="chat-wrapper">
+        <div class="chat-header">
+            <span>{{ t('app_title') }}</span>
+        </div>
+        <div class="chat-body">
+            <div class="lang-switch">
+                {% for code in supported_langs %}
+                    <a class="lang-pill {% if current_lang == code %}active{% endif %}" href="{{ lang_url(code) }}">{{ lang_labels[code] }}</a>
+                {% endfor %}
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul class="flashes">
+                  {% for msg in messages %}
+                    <li>{{ msg }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+
+            <div class="message bot">
+                <h3>👤 {{ t('app_title') }} Login</h3>
+                <p>Please sign in with your phone number.</p>
+            </div>
+
+            <div class="message bot">
+                <form method="post" class="auth-form">
+                    <div class="form-field">
+                        <label for="phone">Phone</label>
+                        <input type="text" name="phone" id="phone" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" id="password" required>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Login</button>
+                </form>
+            </div>
+
+            <p class="small-text">Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
+        </div>
+    </div>
+</body>
+</html>

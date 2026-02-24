@@ -1,0 +1,7 @@
+flask
+mysql-connector-python
+tensorflow
+pandas
+numpy
+joblib
+werkzeug

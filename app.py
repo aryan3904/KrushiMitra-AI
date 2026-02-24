@@ -1,10 +1,13 @@
-from flask import Flask, render_template, request, session, g, url_for , redirect
+from flask import Flask, render_template, request, session, g, url_for, redirect, flash
 import joblib
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras.utils import load_img, img_to_array
 import os
 import pandas as pd
+import functools
+import mysql.connector
+from werkzeug.security import generate_password_hash, check_password_hash
 from treatment_engine import generate_treatment_plan
 from treatment_knowledge import TREATMENT_KNOWLEDGE
 from manual_symptoms import (
@@ -15,6 +18,42 @@ from manual_symptoms import (
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key-change-me")
+
+# ---------- MySQL configuration ---------
+app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'localhost')
+app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'root')
+app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', '')
+app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'krushimitraai')
+
+# simple helpers for interacting with database
+
+def get_db():
+    if 'db_conn' not in g:
+        g.db_conn = mysql.connector.connect(
+            host=app.config['MYSQL_HOST'],
+            user=app.config['MYSQL_USER'],
+            password=app.config['MYSQL_PASSWORD'],
+            database=app.config['MYSQL_DB'],
+            autocommit=True
+        )
+    return g.db_conn
+
+
+def query_db(query, args=(), one=False):
+    conn = get_db()
+    cur = conn.cursor(dictionary=True)
+    cur.execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
+
+
+@app.teardown_appcontext
+
+def close_db(error):
+    db = g.pop('db_conn', None)
+    if db is not None:
+        db.close()
 
 
 SUPPORTED_LANGS = ["en", "hi", "mr", "gu"]
@@ -175,11 +214,19 @@ I18N = {
 
 @app.before_request
 def set_language():
+    # language handling (already present)
     lang = request.args.get("lang") or session.get("lang") or "en"
     if lang not in SUPPORTED_LANGS:
         lang = "en"
     session["lang"] = lang
     g.lang = lang
+
+    # load logged-in user if any
+    user_id = session.get('user_id')
+    if user_id:
+        g.user = query_db('SELECT id, phone, role FROM users WHERE id = %s', (user_id,), one=True)
+    else:
+        g.user = None
 
 def t(key):
     return I18N.get(key, {}).get(g.lang, I18N.get(key, {}).get("en", key))
@@ -191,12 +238,14 @@ def lang_url(lang):
 
 @app.context_processor
 def inject_i18n():
+    # provide global variables to templates
     return dict(
         t=t,
         current_lang=g.lang,
         supported_langs=SUPPORTED_LANGS,
         lang_labels=LANG_LABELS,
-        lang_url=lang_url
+        lang_url=lang_url,
+        current_user=g.user
     )
 
 # =============================
@@ -559,6 +608,99 @@ PEPPER_DISEASE_CLASSES = [
 ]
 
 
+# -------- authentication helpers --------
+
+def login_required(f):
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for('login', lang=g.lang))
+        return f(*args, **kwargs)
+    return decorated
+
+
+def role_required(role):
+    def decorator(f):
+        @functools.wraps(f)
+        def decorated(*args, **kwargs):
+            if g.user is None or g.user.get('role') != role:
+                # simple forbidden response, later could render a template
+                return "Forbidden", 403
+            return f(*args, **kwargs)
+        return decorated
+    return decorator
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        phone = request.form.get('phone')
+        password = request.form.get('password')
+        role = request.form.get('role')
+        if not phone or not password or role not in ('farmer', 'fertilizer_store_head', 'admin'):
+            flash('All fields are required and role must be valid.')
+        else:
+            existing = query_db('SELECT id FROM users WHERE phone = %s', (phone,), one=True)
+            if existing:
+                flash('Phone number already registered.')
+            else:
+                pw_hash = generate_password_hash(password)
+                conn = get_db()
+                cur = conn.cursor()
+                cur.execute(
+                    'INSERT INTO users (phone, password_hash, role) VALUES (%s, %s, %s)',
+                    (phone, pw_hash, role)
+                )
+                conn.commit()
+                flash('Signup successful, please log in.')
+                return redirect(url_for('login', lang=g.lang))
+    return render_template('signup.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        phone = request.form.get('phone')
+        password = request.form.get('password')
+        user = query_db('SELECT * FROM users WHERE phone = %s', (phone,), one=True)
+        if user and check_password_hash(user['password_hash'], password):
+            session.clear()
+            session['user_id'] = user['id']
+            session['role'] = user['role']
+            return redirect(url_for('home', lang=g.lang))
+        else:
+            flash('Invalid phone or password.')
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('home', lang=g.lang))
+
+
+# --- ensure users table exists ---
+def init_db():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            phone VARCHAR(20) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            role ENUM('farmer','fertilizer_store_head','admin') NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB;
+        """
+    )
+    conn.commit()
+    cur.close()
+
+# run once when app starts
+with app.app_context():
+    init_db()
+
 UPLOAD_FOLDER = "static"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
@@ -585,10 +727,13 @@ def predict_crop(img_array):
 # 🚦 ROUTES
 # =============================
 @app.route("/")
+@login_required
 def home():
+    # only authenticated users can see the chat options
     return render_template("index.html")
 
 @app.route("/crop")
+@login_required
 def crop_selection():
     season = request.args.get("season")
     soil = request.args.get("soil")
@@ -601,11 +746,13 @@ def crop_selection():
     return render_template("crop.html", season=season, soil=soil, water=water, predicted_crops=predicted_crops)
 
 @app.route("/crop-plan/<crop>")
+@login_required
 def crop_plan(crop):
     plan = CROP_PLANS.get(crop)
     return render_template("crop_plan.html", crop=crop, plan=plan)
 
 @app.route("/disease")
+@login_required
 def disease_page():
     return render_template("disease.html")
 
@@ -689,6 +836,7 @@ def predict_disease():
 # ==========================================
 
 @app.route("/manual-treatment", methods=["GET"])
+@login_required
 def manual_treatment():
 
     if "manual" not in session:
