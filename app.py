@@ -6,6 +6,7 @@ from tensorflow.keras.utils import load_img, img_to_array
 import os
 import pandas as pd
 import functools
+import re
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 from treatment_engine import generate_treatment_plan
@@ -22,7 +23,7 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key-change-me")
 # ---------- MySQL configuration ---------
 app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'localhost')
 app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'root')
-app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', '')
+app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', 'aryan3904')
 app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'krushimitraai')
 
 # simple helpers for interacting with database
@@ -55,14 +56,14 @@ def close_db(error):
     if db is not None:
         db.close()
 
-
 SUPPORTED_LANGS = ["en", "hi", "mr", "gu"]
+
 LANG_LABELS = {"en": "English", "hi": "हिंदी", "mr": "मराठी", "gu": "ગુજરાતી"}
 
 I18N = {
    
     "app_title": {"en": "Krushi Mitra AI", "hi": "कृषि मित्र AI", "mr": "कृषी मित्र AI", "gu": "કૃષિ મિત્ર AI"},
-    "namaste": {"en": "Namaste!", "hi": "नमस्ते!", "mr": "नमस्कार!", "gu": "નમસ્તે!"},
+    "namaste": {"en": "Namaste", "hi": "नमस्ते", "mr": "नमस्कार", "gu": "નમસ્તે"},
     "home_intro": {"en": "I am Krushi Mitra.", "hi": "मैं कृषि मित्र हूँ।", "mr": "मी कृषी मित्र आहे.", "gu": "હું કૃષિ મિત્ર છું."},
     "home_q": {"en": "How can I help you today?", "hi": "आज मैं आपकी कैसे मदद कर सकता हूँ?", "mr": "आज मी तुम्हाला कशी मदत करू?", "gu": "આજે હું તમારી કેવી મદદ કરી શકું?"},
     "back_home": {"en": "Back to Home", "hi": "होम पर जाएँ", "mr": "होमला जा", "gu": "હોમ પર જાઓ"},
@@ -224,7 +225,7 @@ def set_language():
     # load logged-in user if any
     user_id = session.get('user_id')
     if user_id:
-        g.user = query_db('SELECT id, phone, role FROM users WHERE id = %s', (user_id,), one=True)
+        g.user = query_db('SELECT id, name, phone, role FROM users WHERE id = %s', (user_id,), one=True)
     else:
         g.user = None
 
@@ -634,11 +635,17 @@ def role_required(role):
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        phone = request.form.get('phone')
+        name = request.form.get('name', '').strip()
+        phone = request.form.get('phone', '').strip()
         password = request.form.get('password')
         role = request.form.get('role')
-        if not phone or not password or role not in ('farmer', 'fertilizer_store_head', 'admin'):
+        # only allow farmer or fertilizer_store_head to signup through UI
+        if not name or not phone or not password or role not in ('farmer', 'fertilizer_store_head'):
             flash('All fields are required and role must be valid.')
+        elif not re.match(r'^[A-Za-z ]+$', name):
+            flash('Name may only contain letters and spaces.')
+        elif not re.match(r'^[6-9][0-9]{9}$', phone):
+            flash('Phone must be a valid 10-digit number.')
         else:
             existing = query_db('SELECT id FROM users WHERE phone = %s', (phone,), one=True)
             if existing:
@@ -647,9 +654,10 @@ def signup():
                 pw_hash = generate_password_hash(password)
                 conn = get_db()
                 cur = conn.cursor()
+                # ensure name column present
                 cur.execute(
-                    'INSERT INTO users (phone, password_hash, role) VALUES (%s, %s, %s)',
-                    (phone, pw_hash, role)
+                    'INSERT INTO users (name, phone, password_hash, role) VALUES (%s, %s, %s, %s)',
+                    (name, phone, pw_hash, role)
                 )
                 conn.commit()
                 flash('Signup successful, please log in.')
@@ -687,6 +695,7 @@ def init_db():
         """
         CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) DEFAULT NULL,
             phone VARCHAR(20) UNIQUE NOT NULL,
             password_hash VARCHAR(255) NOT NULL,
             role ENUM('farmer','fertilizer_store_head','admin') NOT NULL,
@@ -694,6 +703,29 @@ def init_db():
         ) ENGINE=InnoDB;
         """
     )
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS diagnosis_history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT,
+            crop VARCHAR(50),
+            disease VARCHAR(100),
+            confidence FLOAT,
+            image_path VARCHAR(255),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+            ON DELETE SET NULL
+        ) ENGINE=InnoDB;
+        """
+    )
+    # make sure name column exists even on older MySQL versions
+    try:
+        cur.execute("SHOW COLUMNS FROM users LIKE 'name'")
+        if not cur.fetchone():
+            cur.execute("ALTER TABLE users ADD COLUMN name VARCHAR(100) DEFAULT NULL")
+    except Exception:
+        # if something goes wrong here we ignore; column absence will surface during signup
+        pass
     conn.commit()
     cur.close()
 
@@ -819,6 +851,31 @@ def predict_disease():
         predicted_class,
         confidence
     )
+     # =============================
+        # 💾 SAVE DIAGNOSIS TO DATABASE
+    # =============================
+
+    if g.user:  # only if logged in
+        conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        INSERT INTO diagnosis_history
+        (user_id, crop, disease, confidence, image_path)
+        VALUES (%s, %s, %s, %s, %s)
+        """,
+        (
+            g.user["id"],
+            crop,
+            predicted_class,
+            confidence,
+            img_path  # path where image saved
+        )
+    )
+
+    conn.commit()
+    cur.close()
 
     if treatment_data is None:
         treatment_data = {}
@@ -1041,6 +1098,289 @@ def manual_treatment():
         )
 
     return redirect(url_for("manual_treatment"))
+   # ==========================================
+    # 📊 FARMER DIAGNOSIS HISTORY
+    # ==========================================
+
+@app.route("/my-history")
+@login_required
+def my_history():
+
+    records = query_db(
+        """
+        SELECT * FROM diagnosis_history
+        WHERE user_id = %s
+        ORDER BY created_at DESC
+        """,
+        (g.user["id"],)
+    )
+
+    return render_template("history.html", records=records)
+
+    
+
+# ==========================================
+# 👑 ADMIN - ANALYTICS DASHBOARD
+# ==========================================
+
+@app.route("/admin-history")
+@login_required
+@role_required("admin")
+def admin_history():
+
+    # 🔹 All records
+    records = query_db(
+        """
+        SELECT dh.*, u.name, u.phone
+        FROM diagnosis_history dh
+        LEFT JOIN users u ON dh.user_id = u.id
+        ORDER BY dh.created_at DESC
+        """
+    )
+
+    # 🔹 Total Users
+    total_users = query_db(
+        "SELECT COUNT(*) as count FROM users",
+        one=True
+    )["count"]
+
+    # 🔹 Total Diagnoses
+    total_diagnosis = query_db(
+        "SELECT COUNT(*) as count FROM diagnosis_history",
+        one=True
+    )["count"]
+
+    # 🔹 Most Common Disease
+    common_disease = query_db(
+        """
+        SELECT disease, COUNT(*) as total
+        FROM diagnosis_history
+        GROUP BY disease
+        ORDER BY total DESC
+        LIMIT 1
+        """,
+        one=True
+    )
+
+    # 🔹 Most Affected Crop
+    common_crop = query_db(
+        """
+        SELECT crop, COUNT(*) as total
+        FROM diagnosis_history
+        GROUP BY crop
+        ORDER BY total DESC
+        LIMIT 1
+        """,
+        one=True
+    )
+
+    # 🔹 Average Confidence
+    avg_conf = query_db(
+        """
+        SELECT AVG(confidence) as avg_conf
+        FROM diagnosis_history
+        """,
+        one=True
+    )
+
+    disease_distribution = query_db(
+    """
+    SELECT disease, COUNT(*) as total
+    FROM diagnosis_history
+    GROUP BY disease
+    ORDER BY total DESC
+    """
+)
+
+    # Calculate percentage in backend (cleaner)
+    if total_diagnosis > 0:
+        for item in disease_distribution:
+            item["percent"] = round((item["total"] / total_diagnosis) * 100, 2)
+    else:
+        for item in disease_distribution:
+            item["percent"] = 0
+
+    return render_template(
+        "admin_history.html",
+        records=records,
+        total_users=total_users,
+        total_diagnosis=total_diagnosis,
+        common_disease=common_disease,
+        common_crop=common_crop,
+        avg_conf=avg_conf,
+        disease_distribution=disease_distribution
+    )
+
+# ==========================================
+# 🏬 STORE HEAD - VIEW PRODUCTS
+# ==========================================
+
+@app.route("/store-products")
+@login_required
+@role_required("fertilizer_store_head")
+def store_products():
+
+    products = query_db(
+        """
+        SELECT * FROM fertilizer_products
+        WHERE store_id = %s
+        ORDER BY created_at DESC
+        """,
+        (g.user["id"],)
+    )
+
+    return render_template(
+        "store_products.html",
+        products=products
+    )
+# ==========================================
+# ➕ STORE HEAD - ADD PRODUCT (With Image)
+# ==========================================
+
+@app.route("/add-product", methods=["GET", "POST"])
+@login_required
+@role_required("fertilizer_store_head")
+def add_product():
+
+    if request.method == "POST":
+
+        product_name = request.form.get("product_name")
+        company = request.form.get("company")
+        crop_type = request.form.get("crop_type")
+        fertilizer_type = request.form.get("fertilizer_type")
+        price = request.form.get("price")
+        stock = request.form.get("stock")
+        description = request.form.get("description")
+
+        image_file = request.files.get("image")
+
+        image_filename = None
+
+        if image_file and image_file.filename != "":
+            image_filename = image_file.filename
+            image_path = os.path.join("static/product_images", image_filename)
+            image_file.save(image_path)
+
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute(
+            """
+            INSERT INTO fertilizer_products
+            (store_id, product_name, company, crop_type, fertilizer_type, price, stock, description, image_path)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """,
+            (
+                g.user["id"],
+                product_name,
+                company,
+                crop_type,
+                fertilizer_type,
+                price,
+                stock,
+                description,
+                image_filename
+            )
+        )
+
+        conn.commit()
+        cur.close()
+
+        return redirect(url_for("store_products"))
+
+    return render_template("add_product.html")
+
+ # ==========================================
+# 👨‍🌾 FARMER - VIEW FERTILIZER MARKETPLACE
+# ==========================================
+
+@app.route("/fertilizer-marketplace")
+@login_required
+@role_required("farmer")
+def fertilizer_marketplace():
+
+    crop = request.args.get("crop")
+
+    if crop:
+        products = query_db(
+            """
+            SELECT fp.*, u.name as store_name
+            FROM fertilizer_products fp
+            LEFT JOIN users u ON fp.store_id = u.id
+            WHERE fp.crop_type = %s
+            ORDER BY fp.created_at DESC
+            """,
+            (crop,)
+        )
+    else:
+        products = []
+
+    return render_template(
+        "fertilizer_marketplace.html",
+        products=products,
+        crop=crop
+    )
+   
+   # ==========================================
+# 🏬 STORE HEAD - BULK CSV UPLOAD
+# ==========================================
+
+@app.route("/store-upload-csv", methods=["GET", "POST"])
+@login_required
+@role_required("fertilizer_store_head")
+def store_upload_csv():
+
+    if request.method == "POST":
+
+        print("POST request received")
+
+        file = request.files.get("csv_file")
+
+        if not file:
+            flash("Please upload a CSV file.")
+            return redirect(url_for("store_upload_csv"))
+
+        try:
+            df = pd.read_csv(file)
+            print("CSV Loaded")
+
+            conn = get_db()
+            cur = conn.cursor()
+
+            for _, row in df.iterrows():
+                print("Inserting:", row["name"])
+
+                cur.execute(
+                    """
+                    INSERT INTO fertilizer_products
+                    (store_id, product_name, company, crop_type, fertilizer_type, price, stock, description)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        g.user["id"],
+                        row["name"],
+                        row["company"],
+                        row["crop_type"],
+                        row["type"],
+                        float(row["price"]),
+                        int(row["stock"]),
+                        row.get("description", "")
+                    )
+                )
+
+            conn.commit()
+            cur.close()
+
+            flash("Products uploaded successfully!")
+            return redirect(url_for("store_products"))
+
+        except Exception as e:
+            print("ERROR:", e)
+            flash(f"Error: {str(e)}")
+            return redirect(url_for("store_upload_csv"))
+
+    # ✅ IMPORTANT: This return must exist for GET request
+    return render_template("store_upload_csv.html")
 # =============================
 # ▶ RUN
 # =============================

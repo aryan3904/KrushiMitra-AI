@@ -1,0 +1,50 @@
+<!-- templates/store_products.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Fertilizer Products</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="chat-wrapper">
+    <div class="chat-header">
+        🏬 My Fertilizer Products
+    </div>
+    <a href="{{ url_for('store_upload_csv') }}">
+    📂 Bulk Upload via CSV
+    </a>
+    <div class="chat-body">
+
+        <a href="{{ url_for('add_product') }}" class="option">
+            ➕ Add New Product
+        </a>
+
+        <br><br>
+
+        {% if products %}
+            {% for product in products %}
+                <div class="message bot">
+                    {% if product.image_path %}
+                        <img src="{{ url_for('static', filename='product_images/' + product.image_path) }}"
+                            style="width:120px; border-radius:8px;"><br><br>
+                    {% endif %}
+                    <strong>{{ product.product_name }}</strong><br>
+                    Company: {{ product.company }}<br>
+                    Crop: {{ product.crop_type }}<br>
+                    Type: {{ product.fertilizer_type }}<br>
+                    Price: ₹{{ product.price }}<br>
+                    Stock: {{ product.stock }}<br>
+                    Description: {{ product.description }}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No products added yet.</p>
+        {% endif %}
+
+    </div>
+</div>
+
+</body>
+</html> 

@@ -1,0 +1,21 @@
+name,company,crop_type,type,price,stock,description
+NPK 20-20-20,IFFCO,Tomato,NPK,650,50,Balanced fertilizer for growth
+NPK 12-32-16,Coromandel,Tomato,NPK,720,40,High phosphorus fertilizer
+Copper Oxychloride,Bayer,Tomato,Fungicide,800,30,Controls blight
+Mancozeb 75 WP,UPL,Tomato,Fungicide,550,60,Prevents fungal infection
+Neem Oil Spray,Organic India,Tomato,Organic,450,80,Natural pest control
+DAP Fertilizer,IFFCO,Potato,NPK,1350,25,Promotes root development
+Urea Granules,Chambal,Potato,Nitrogen,270,100,Boost vegetative growth
+Potash Fertilizer,Coromandel,Potato,Potassium,980,35,Improves tuber quality
+Metalaxyl,Bayer,Potato,Fungicide,750,45,Controls late blight
+Bio Compost,GreenGrow,Potato,Organic,400,90,Improves soil health
+NPK 19-19-19,Shriya Agro,Pepper,NPK,600,70,Balanced nutrition
+Magnesium Sulphate,AgroTech,Pepper,Micronutrient,480,50,Corrects deficiency
+Imidacloprid 17.8 SL,UPL,Pepper,Insecticide,900,20,Controls sucking pests
+Azadirachtin,Organic India,Pepper,Organic,520,60,Natural insect control
+Calcium Nitrate,Yara,Tomato,Micronutrient,850,40,Prevents blossom rot
+Sulphur Dust,Tata Chemicals,Tomato,Fungicide,300,75,Controls powdery mildew
+Potassium Nitrate,Coromandel,Pepper,NPK,880,45,Improves fruit size
+Zinc Sulphate,AgroTech,Potato,Micronutrient,420,65,Corrects zinc deficiency
+Bio Fertilizer,RhizoGrow,Tomato,Organic,500,80,Improves soil microbes
+Chlorpyrifos 20 EC,UPL,Potato,Insecticide,750,35,Controls soil pests

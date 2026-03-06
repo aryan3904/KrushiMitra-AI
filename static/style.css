@@ -75,12 +75,25 @@ body {
     background: var(--gradient-primary);
     color: white;
     padding: 24px 20px;
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* keep relative for pseudo-element icon */
+    position: relative;
     font-weight: 700;
     font-size: 24px;
     letter-spacing: 0.5px;
-    position: relative;
     box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+}
+
+/* allow title to stay centered while user-info is on the right */
+.chat-header .header-title {
+    flex: 1;
+    text-align: center;
+}
+
+.chat-header .user-info {
+    font-size: 0.9rem;
 }
 
 .chat-header::before {

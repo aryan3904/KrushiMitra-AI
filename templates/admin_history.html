@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin - All Diagnosis Records</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="chat-wrapper">
+    <div class="chat-header">
+        <span>👑 Admin Dashboard - All Diagnosis Records</span>
+    </div>
+<!-- ============================= -->
+<!-- 📊 ANALYTICS SUMMARY -->
+<!-- ============================= -->
+
+<div class="message bot" style="margin-bottom:20px;">
+    <h3>📊 Platform Analytics</h3>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;">
+
+        <div style="background:#f0fdf4; padding:15px; border-radius:10px;">
+            <strong>👥 Total Users</strong>
+            <p style="font-size:22px; margin:5px 0;">{{ total_users }}</p>
+        </div>
+
+        <div style="background:#fefce8; padding:15px; border-radius:10px;">
+            <strong>🌾 Total Diagnoses</strong>
+            <p style="font-size:22px; margin:5px 0;">{{ total_diagnosis }}</p>
+        </div>
+
+        <div style="background:#eff6ff; padding:15px; border-radius:10px;">
+            <strong>🦠 Most Common Disease</strong>
+            <p style="margin:5px 0;">
+                {% if common_disease %}
+                    {{ common_disease.disease }} ({{ common_disease.total }})
+                {% else %}
+                    No data
+                {% endif %}
+            </p>
+        </div>
+
+        <div style="background:#fff7ed; padding:15px; border-radius:10px;">
+            <strong>🌱 Most Affected Crop</strong>
+            <p style="margin:5px 0;">
+                {% if common_crop %}
+                    {{ common_crop.crop }} ({{ common_crop.total }})
+                {% else %}
+                    No data
+                {% endif %}
+            </p>
+        </div>
+
+        <div style="background:#fdf2f8; padding:15px; border-radius:10px;">
+            <strong>📈 Avg Confidence</strong>
+            <p style="margin:5px 0;">
+                {% if avg_conf and avg_conf.avg_conf %}
+                    {{ "%.2f"|format(avg_conf.avg_conf) }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
+        </div>
+
+    </div>
+
+</div>
+<!-- ============================= -->
+<!-- 🦠 Disease Distribution -->
+<!-- ============================= -->
+
+<div class="message bot" style="margin-top:20px;">
+    <h3>🦠 Disease Distribution</h3>
+
+    {% if disease_distribution %}
+        <div style="margin-top:15px;">
+
+            {% for item in disease_distribution %}
+
+                <div style="margin-bottom:15px;">
+                    
+                    <!-- Disease Name + Count -->
+                    <div style="display:flex; justify-content:space-between;">
+                        <strong>{{ item.disease }}</strong>
+                        <span>{{ item.total }}</span>
+                    </div>
+
+                    <!-- Progress Bar Background -->
+                    <div style="background:#e5e7eb; height:8px; border-radius:6px; overflow:hidden; margin-top:6px;">
+                        
+                        {% if total_diagnosis > 0 %}
+                            {% set percent = (item.total / total_diagnosis * 100) %}
+                        {% else %}
+                            {% set percent = 0 %}
+                        {% endif %}
+
+                        <!-- Progress Bar Fill -->
+                      <div style="width: {{ item.percent }}%; background: linear-gradient(90deg, #16a34a, #22c55e); height: 100%;"></div>
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+    {% else %}
+        <p>No diagnosis data available.</p>
+    {% endif %}
+</div>
+    <div class="chat-body">
+
+        {% if records %}
+            {% for record in records %}
+                <div class="message bot" style="margin-bottom:20px;">
+
+                    <p><strong>👤 Farmer:</strong> {{ record.name }} ({{ record.phone }})</p>
+                    <p><strong>🌾 Crop:</strong> {{ record.crop }}</p>
+                    <p><strong>🦠 Disease:</strong> {{ record.disease }}</p>
+                    <p><strong>📊 Confidence:</strong> {{ record.confidence }}</p>
+                    <p><strong>📅 Date:</strong> {{ record.created_at }}</p>
+
+                    <img src="/{{ record.image_path }}"
+                         width="150"
+                         style="margin-top:10px; border-radius:10px;">
+
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="message bot">
+                <p>No diagnosis records found.</p>
+            </div>
+        {% endif %}
+
+        <div style="margin-top:20px;">
+            <a href="{{ url_for('home') }}" class="option">
+                🏠 Back to Home
+            </a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -10,10 +10,10 @@
 <body>
     <div class="chat-wrapper">
         <div class="chat-header">
-            <span>{{ t('app_title') }}</span>
-            <div style="position:absolute; right:16px; top:12px;">
+            <span class="header-title">{{ t('app_title') }}</span>
+            <div class="user-info">
                 {% if current_user %}
-                    <small>{{ current_user.phone }} ({{ current_user.role }})</small>
+                    <small>{% if current_user.name and not current_user.name.isdigit() %}{{ current_user.name }}{% else %}User{% endif %} ({{ current_user.role }})</small>
                     | <a href="{{ url_for('logout') }}">Logout</a>
                 {% else %}
                     <a href="{{ url_for('login') }}">Login</a> |
@@ -32,7 +32,9 @@
 
             <!-- Welcome Message -->
             <div class="message bot">
-                <h2 style="margin: 0 0 12px 0; color: var(--brand-green);">🌾 {{ t('namaste') }}{% if current_user %}, {{ current_user.phone }}{% endif %}!</h2>
+                <h2 style="margin: 0 0 12px 0; color: var(--brand-green);">
+                    🌾 {{ t('namaste') }}{% if current_user %}, {% if current_user.name and not current_user.name.isdigit() %}{{ current_user.name }}{% else %}Name{% endif %}{% endif %}!
+                </h2>
                 <p style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">{{ t('home_intro') }}</p>
                 <p style="margin: 0; color: var(--text-secondary);">{{ t('home_q') }}</p>
             </div>
@@ -53,18 +55,40 @@
                         <br><small style="color: var(--text-muted);">{{ t('opt_disease_desc') }}</small>
                     </div>
                 </a>
-                <a href="#" class="option disabled" aria-disabled="true">
-                    <span style="font-size: 24px;">🌾</span>
+                {% if current_user and current_user.role == 'farmer' %}
+                <a href="{{ url_for('my_history', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">📊</span>
                     <div>
-                        <strong>{{ t('opt_fertilizer') }}</strong>
-                        <br><small style="color: var(--text-muted);">{{ t('coming_soon') }}</small>
+                        <strong>My Diagnosis History</strong>
+                        <br><small style="color: var(--text-muted);">
+                            View previous disease reports
+                        </small>
                     </div>
                 </a>
+                {% endif %}
+                {% if current_user and current_user.role == 'admin' %}
+                <a href="{{ url_for('admin_history', lang=current_lang) }}" class="option">
+                    <span style="font-size: 24px;">👑</span>
+                    <div>
+                        <strong>Admin Dashboard</strong>
+                        <br><small style="color: var(--text-muted);">
+                            View all farmers' diagnosis records
+                        </small>
+                    </div>
+                </a>
+                {% endif %}
                 <a href="{{ url_for('manual_treatment', lang=current_lang) }}" class="option">
                     <span style="font-size: 24px;">🩺</span>
                     <div>
                         <strong>Treatment Recommendation</strong>
                         <br><small style="color: var(--text-muted);">Manual crop disease & pest advisory</small>
+                    </div>
+                </a>
+                  <a href="#" class="option disabled" aria-disabled="true">
+                    <span style="font-size: 24px;">🌾</span>
+                    <div>
+                        <strong>{{ t('opt_fertilizer') }}</strong>
+                        <br><small style="color: var(--text-muted);">{{ t('coming_soon') }}</small>
                     </div>
                 </a>
 

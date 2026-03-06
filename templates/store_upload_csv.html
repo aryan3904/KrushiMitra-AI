@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Fertilizers</title>
+</head>
+<body>
+
+<h2>📂 Upload Fertilizer CSV</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="csv_file" accept=".csv" required>
+    <br><br>
+    <button type="submit">Upload</button>
+</form>
+
+<br>
+<a href="{{ url_for('store_products') }}">⬅ Back to Products</a>
+
+</body>
+</html>

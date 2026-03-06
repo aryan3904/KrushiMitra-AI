@@ -9,10 +9,10 @@
 
 <div class="chat-wrapper">
     <div class="chat-header">
-        <span>🩺 Treatment Recommendation</span>
-        <div style="position:absolute; right:16px; top:12px;">
+        <span class="header-title">🩺 Treatment Recommendation</span>
+        <div class="user-info">
             {% if current_user %}
-                <small>{{ current_user.phone }} ({{ current_user.role }})</small>
+                <small>{% if current_user.name and not current_user.name.isdigit() %}{{ current_user.name }}{% else %}User{% endif %} ({{ current_user.role }})</small>
                 | <a href="{{ url_for('logout') }}">Logout</a>
             {% else %}
                 <a href="{{ url_for('login') }}">Login</a> |

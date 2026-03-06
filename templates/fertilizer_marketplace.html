@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fertilizer Marketplace</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="chat-wrapper">
+    <div class="chat-header">
+        🌾 Fertilizer Marketplace
+    </div>
+
+    <div class="chat-body">
+
+        {% if crop %}
+            <h3>Recommended for Crop: {{ crop }}</h3>
+        {% endif %}
+
+        {% if products %}
+            {% for product in products %}
+                <div class="message bot">
+
+                    {% if product.image_path %}
+                        <img src="{{ url_for('static', filename='product_images/' + product.image_path) }}"
+                             style="width:150px; border-radius:8px;"><br><br>
+                    {% endif %}
+
+                    <strong>{{ product.product_name }}</strong><br>
+                    Company: {{ product.company }}<br>
+                    Store: {{ product.store_name }}<br>
+                    Price: ₹{{ product.price }}<br>
+                    Stock: {{ product.stock }}<br>
+
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No products available for this crop.</p>
+        {% endif %}
+
+    </div>
+</div>
+
+</body>
+</html>

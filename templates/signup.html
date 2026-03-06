@@ -8,7 +8,16 @@
 <body>
     <div class="chat-wrapper">
         <div class="chat-header">
-            <span>{{ t('app_title') }}</span>
+            <span class="header-title">{{ t('app_title') }}</span>
+            <div class="user-info">
+                {% if current_user %}
+                    <small>{{ current_user.phone }} ({{ current_user.role }})</small>
+                    | <a href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Login</a> |
+                    <a href="{{ url_for('signup') }}">Sign Up</a>
+                {% endif %}
+            </div>
         </div>
         <div class="chat-body">
             <div class="lang-switch">
@@ -35,8 +44,12 @@
             <div class="message bot">
                 <form method="post" class="auth-form">
                     <div class="form-field">
+                        <label for="name">Name</label>
+                        <input type="text" name="name" id="name" required pattern="[A-Za-z ]+" title="Letters and spaces only">
+                    </div>
+                    <div class="form-field">
                         <label for="phone">Phone</label>
-                        <input type="text" name="phone" id="phone" required>
+                        <input type="tel" name="phone" id="phone" required pattern="[6-9][0-9]{9}" title="10 digit Indian mobile number starting with 6-9">
                     </div>
                     <div class="form-field">
                         <label for="password">Password</label>
@@ -47,7 +60,7 @@
                         <select name="role" id="role" required>
                             <option value="farmer">Farmer</option>
                             <option value="fertilizer_store_head">Fertilizer Store Head</option>
-                            <option value="admin">Admin</option>
+                            <!-- admin role must be assigned by owner directly in the database -->
                         </select>
                     </div>
                     <button type="submit" class="btn-primary">Sign Up</button>

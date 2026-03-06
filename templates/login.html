@@ -8,7 +8,16 @@
 <body>
     <div class="chat-wrapper">
         <div class="chat-header">
-            <span>{{ t('app_title') }}</span>
+            <span class="header-title">{{ t('app_title') }}</span>
+            <div class="user-info">
+                {% if current_user %}
+                    <small>{{ current_user.phone }} ({{ current_user.role }})</small>
+                    | <a href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Login</a> |
+                    <a href="{{ url_for('signup') }}">Sign Up</a>
+                {% endif %}
+            </div>
         </div>
         <div class="chat-body">
             <div class="lang-switch">

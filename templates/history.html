@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Diagnosis History</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="chat-wrapper">
+    <div class="chat-header">
+        <span>📊 My Diagnosis History</span>
+    </div>
+
+    <div class="chat-body">
+
+        {% if records %}
+            {% for record in records %}
+                <div class="message bot" style="margin-bottom:20px;">
+                    
+                    <p><strong>🌾 Crop:</strong> {{ record.crop }}</p>
+                    <p><strong>🦠 Disease:</strong> {{ record.disease }}</p>
+                    <p><strong>📊 Confidence:</strong> {{ record.confidence }}</p>
+                    <p><strong>📅 Date:</strong> {{ record.created_at }}</p>
+
+                    <img src="/{{ record.image_path }}" 
+                         width="150"
+                         style="margin-top:10px; border-radius:10px;">
+
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="message bot">
+                <p>No diagnosis history found.</p>
+            </div>
+        {% endif %}
+
+        <div style="margin-top:20px;">
+            <a href="{{ url_for('home') }}" class="option">
+                🏠 Back to Home
+            </a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
