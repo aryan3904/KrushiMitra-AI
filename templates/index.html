@@ -84,6 +84,25 @@
                         <br><small style="color: var(--text-muted);">Manual crop disease & pest advisory</small>
                     </div>
                 </a>
+                {% if current_user and current_user.role == "fertilizer_store_head" %}
+
+                <a href="{{ url_for('add_product') }}" class="option">
+                    <span style="font-size: 24px;">➕</span>
+                    <div>
+                        <strong>Add Fertilizer Product</strong>
+                        <br><small style="color: var(--text-muted);">Add fertilizer to marketplace</small>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('store_products') }}" class="option">
+                    <span style="font-size: 24px;">🏬</span>
+                    <div>
+                        <strong>My Store Products</strong>
+                        <br><small style="color: var(--text-muted);">Manage your fertilizer inventory</small>
+                    </div>
+                </a>
+
+                {% endif %}
                   <a href="#" class="option disabled" aria-disabled="true">
                     <span style="font-size: 24px;">🌾</span>
                     <div>
